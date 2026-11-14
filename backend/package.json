@@ -7,7 +7,7 @@
     "prettier": "prettier --check **/*.js",
     "prettier:fix": "prettier --check **/*.js",
     "lint-staged": "lint-staged",
-    "prepare": "husky install"
+    "prepare": "cd .. && husky install backend/.husky || exit 0"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.828.0",
