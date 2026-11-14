@@ -12,7 +12,6 @@ import { format } from "date-fns";
 import { Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -67,25 +66,31 @@ const HOW_TO_IMPORT = [
   [],
   ["1. Make a backup of the company in Peachtree first."],
   [
-    "2. The Customer IDs, Item IDs and G/L accounts used in the file must already exist in Peachtree.",
+    "2. Fill the empty \"Accounts Receivable Account\" and \"G/L Account\" columns with your Peachtree account numbers.",
   ],
   [
-    "3. Use the .csv file (Peachtree cannot import .xlsx). This Excel copy is for checking only.",
+    "   (Item lines = sales income account, VAT line = VAT payable, Discount line = sales discount.)",
   ],
   [
-    "4. In Peachtree: File > Select Import/Export > Accounts Receivable > Sales Journal > Import.",
+    "3. The Customer IDs, Item IDs and G/L accounts used in the file must already exist in Peachtree.",
   ],
   [
-    "5. Layout tab: show exactly these fields, in this order (same as the column headings):",
+    "4. Save the sheet as .csv (Peachtree cannot import .xlsx).",
+  ],
+  [
+    "5. In Peachtree: File > Select Import/Export > Accounts Receivable > Sales Journal > Import.",
+  ],
+  [
+    "6. Layout tab: show exactly these fields, in this order (same as the column headings):",
   ],
   ...PEACHTREE_SALES_HEADERS.map((header, index) => [
     `   ${index + 1}. ${header}`,
   ]),
   [
-    '6. Options tab: choose the .csv file and tick "First Row Contains Headings". Then OK.',
+    '7. Options tab: choose the .csv file and tick "First Row Contains Headings". Then OK.',
   ],
   [
-    "7. Try one day of sales first and check the invoices in Peachtree before importing a long period.",
+    "8. Try one day of sales first and check the invoices in Peachtree before importing a long period.",
   ],
   [],
   [
@@ -139,7 +144,7 @@ export default function ExportPeachtree({
         toast.error("No sales in this period");
         return;
       }
-      const missing = missingPeachtreeSettings(sells, settings);
+      const missing = missingPeachtreeSettings(settings);
       if (missing.length > 0) {
         toast.error(`Fill in: ${missing.join(", ")}`);
         return;
@@ -182,24 +187,6 @@ export default function ExportPeachtree({
     }
   };
 
-  const field = (
-    key: "arAccount" | "salesAccount" | "vatAccount" | "discountAccount",
-    label: string,
-    placeholder: string,
-    hint: string,
-  ) => (
-    <div className="space-y-1">
-      <Label htmlFor={`pt-${key}`}>{label}</Label>
-      <Input
-        id={`pt-${key}`}
-        value={settings[key]}
-        placeholder={placeholder}
-        onChange={(e) => update({ [key]: e.target.value })}
-      />
-      <p className="text-muted-foreground text-xs">{hint}</p>
-    </div>
-  );
-
   return (
     <>
       <Button
@@ -228,32 +215,11 @@ export default function ExportPeachtree({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {field(
-              "arAccount",
-              "Accounts Receivable account *",
-              "e.g. 1100",
-              "G/L account the invoice amount is debited to",
-            )}
-            {field(
-              "salesAccount",
-              "Sales income account *",
-              "e.g. 4000",
-              "G/L account for the item lines",
-            )}
-            {field(
-              "vatAccount",
-              "VAT payable account",
-              "e.g. 2310",
-              "Needed when sales have VAT",
-            )}
-            {field(
-              "discountAccount",
-              "Sales discount account",
-              "e.g. 4900",
-              "Needed when sales have a discount",
-            )}
-          </div>
+          <p className="rounded-md border border-dashed p-3 text-sm">
+            The G/L account columns (Accounts Receivable Account, G/L Account)
+            are left empty. Fill them in Excel before importing into
+            Peachtree.
+          </p>
 
           <div className="space-y-3 rounded-md border p-3">
             <label className="flex cursor-pointer items-center gap-2 text-sm">
@@ -342,10 +308,10 @@ export default function ExportPeachtree({
           )}
 
           <p className="text-muted-foreground text-xs">
-            Peachtree imports the <strong>.csv</strong> file (File &gt; Select
-            Import/Export &gt; Accounts Receivable &gt; Sales Journal). The
-            Excel file has the same rows plus the import steps. Try one day
-            first.
+            Download Excel, add the accounts, then save it as{" "}
+            <strong>.csv</strong> for Peachtree (File &gt; Select Import/Export
+            &gt; Accounts Receivable &gt; Sales Journal). The Excel file also
+            has the import steps. Try one day first.
           </p>
 
           <DialogFooter>

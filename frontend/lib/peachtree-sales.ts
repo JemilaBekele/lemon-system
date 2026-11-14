@@ -30,11 +30,9 @@ export const PEACHTREE_SALES_HEADERS = [
   "Amount",
 ] as const;
 
+// G/L account columns are left empty: the accountant fills them in Excel
+// before importing.
 export type TPeachtreeSettings = {
-  arAccount: string; // Accounts Receivable G/L account, e.g. 1100
-  salesAccount: string; // income account for the item lines, e.g. 4000
-  vatAccount: string; // VAT payable account (only needed when a sale has VAT)
-  discountAccount: string; // sales discount account (only with discounts)
   // One customer ID for every sale (e.g. CASH), else one per customer
   singleCustomer: boolean;
   customerId: string;
@@ -43,10 +41,6 @@ export type TPeachtreeSettings = {
 };
 
 export const DEFAULT_PEACHTREE_SETTINGS: TPeachtreeSettings = {
-  arAccount: "",
-  salesAccount: "",
-  vatAccount: "",
-  discountAccount: "",
   singleCustomer: true,
   customerId: "CASH",
   includeItemId: true,
@@ -163,7 +157,7 @@ export const buildPeachtreeSalesRows = (
         quantity: amount(-quantity),
         itemId: settings.includeItemId ? toId(code) : "",
         description: (name || code || "Item").slice(0, MAX_DESCRIPTION),
-        account: settings.salesAccount,
+        account: "",
         unitPrice: amount(toNumber(item.unitPrice)),
         amount: -lineTotal,
       };
@@ -175,7 +169,7 @@ export const buildPeachtreeSalesRows = (
         quantity: "",
         itemId: "",
         description: "Discount",
-        account: settings.discountAccount,
+        account: "",
         unitPrice: "",
         amount: discount,
       });
@@ -186,7 +180,7 @@ export const buildPeachtreeSalesRows = (
         quantity: "",
         itemId: "",
         description: "VAT",
-        account: settings.vatAccount,
+        account: "",
         unitPrice: "",
         amount: -vat,
       });
@@ -205,7 +199,7 @@ export const buildPeachtreeSalesRows = (
         invoiceNo,
         date,
         date, // due the same day (cash sale)
-        settings.arAccount,
+        "", // Accounts Receivable account
         amount(receivable),
         lines.length,
         index + 1,
@@ -224,24 +218,9 @@ export const buildPeachtreeSalesRows = (
   return { rows, invoices, skipped, total: round2(total) };
 };
 
-// Settings the export cannot work without, given the sales in it
-export const missingPeachtreeSettings = (
-  sells: ISell[],
-  settings: TPeachtreeSettings,
-) => {
+// Settings the export cannot work without
+export const missingPeachtreeSettings = (settings: TPeachtreeSettings) => {
   const missing: string[] = [];
-  if (!settings.arAccount.trim()) missing.push("Accounts Receivable account");
-  if (!settings.salesAccount.trim()) missing.push("Sales income account");
-  const included = sells.filter(
-    (s) => !EXCLUDED_STATUSES.includes(s.saleStatus),
-  );
-  if (!settings.vatAccount.trim() && included.some((s) => toNumber(s.vat) > 0))
-    missing.push("VAT payable account");
-  if (
-    !settings.discountAccount.trim() &&
-    included.some((s) => toNumber(s.discount) > 0)
-  )
-    missing.push("Sales discount account");
   if (settings.singleCustomer && !settings.customerId.trim())
     missing.push("Customer ID");
   return missing;
