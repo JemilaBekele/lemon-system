@@ -61,6 +61,19 @@ const saveSettings = (settings: TPeachtreeSettings) => {
 const dayText = (iso?: string) =>
   iso ? format(new Date(iso), "yyyy-MM-dd") : "";
 
+const DATE_COLUMN = PEACHTREE_SALES_HEADERS.indexOf("Date");
+const DUE_COLUMN = PEACHTREE_SALES_HEADERS.indexOf("Date Due");
+const CREATED_COLUMN = PEACHTREE_SALES_HEADERS.length;
+
+// Excel day number of the local calendar day (date only, no time)
+const excelDay = (iso?: string): number | string => {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const utcDay = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+  return (utcDay - Date.UTC(1899, 11, 30)) / 86400000;
+};
+
 const HOW_TO_IMPORT = [
   ["How to import into Peachtree (Sage 50)"],
   [],
@@ -75,7 +88,7 @@ const HOW_TO_IMPORT = [
     "3. The Customer IDs, Item IDs and G/L accounts used in the file must already exist in Peachtree.",
   ],
   [
-    "4. Save the sheet as .csv (Peachtree cannot import .xlsx).",
+    '4. Delete the last column "Created At" (it is for your information only), then save the sheet as .csv (Peachtree cannot import .xlsx).',
   ],
   [
     "5. In Peachtree: File > Select Import/Export > Accounts Receivable > Sales Journal > Import.",
@@ -157,19 +170,47 @@ export default function ExportPeachtree({
         setSummary(result);
         return;
       }
-      const sheet = XLSX.utils.aoa_to_sheet([
-        [...PEACHTREE_SALES_HEADERS],
-        ...result.rows,
-      ]);
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, sheet, "Sales Journal");
-
       if (kind === "csv") {
+        // The file Peachtree imports: exactly the layout columns, nothing else
+        const sheet = XLSX.utils.aoa_to_sheet([
+          [...PEACHTREE_SALES_HEADERS],
+          ...result.rows,
+        ]);
+        XLSX.utils.book_append_sheet(workbook, sheet, "Sales Journal");
         XLSX.writeFile(workbook, `${fileBase}.csv`, { bookType: "csv" });
       } else {
-        sheet["!cols"] = PEACHTREE_SALES_HEADERS.map((header) => ({
-          wch: header === "Description" ? 40 : Math.max(12, header.length + 2),
-        }));
+        // Excel copy: real date cells in wide columns (no "####"), plus a
+        // "Created At" column after the Peachtree columns
+        const dateFormat = settings.dateFormat.toLowerCase();
+        const sheet = XLSX.utils.aoa_to_sheet([
+          [...PEACHTREE_SALES_HEADERS, "Created At"],
+          ...result.rows.map((row, index) => {
+            const { sale, created } = result.dates[index];
+            const copy: (string | number)[] = [...row, excelDay(created)];
+            copy[DATE_COLUMN] = excelDay(sale);
+            copy[DUE_COLUMN] = excelDay(sale);
+            return copy;
+          }),
+        ]);
+        const dateColumns = [DATE_COLUMN, DUE_COLUMN, CREATED_COLUMN];
+        result.rows.forEach((_, index) => {
+          dateColumns.forEach((column) => {
+            const cell =
+              sheet[XLSX.utils.encode_cell({ r: index + 1, c: column })];
+            if (cell && typeof cell.v === "number") cell.z = dateFormat;
+          });
+        });
+        sheet["!cols"] = [...PEACHTREE_SALES_HEADERS, "Created At"].map(
+          (header, column) => ({
+            wch: dateColumns.includes(column)
+              ? 14
+              : header === "Description"
+                ? 40
+                : Math.max(12, header.length + 2),
+          }),
+        );
+        XLSX.utils.book_append_sheet(workbook, sheet, "Sales Journal");
         const help = XLSX.utils.aoa_to_sheet(HOW_TO_IMPORT);
         help["!cols"] = [{ wch: 110 }];
         XLSX.utils.book_append_sheet(workbook, help, "How to import");

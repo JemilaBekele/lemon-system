@@ -99,6 +99,9 @@ export const peachtreeCustomerId = (
 
 export type TPeachtreeResult = {
   rows: TRow[]; // without the header row
+  // Per row: the sale date and the date the sale was created (ISO), for the
+  // Excel copy, which shows them as real dates plus a "Created At" column
+  dates: { sale: string; created: string }[];
   invoices: number;
   skipped: { invoiceNo: string; reason: string }[];
   total: number; // sum of A/R amounts
@@ -109,6 +112,7 @@ export const buildPeachtreeSalesRows = (
   settings: TPeachtreeSettings,
 ): TPeachtreeResult => {
   const rows: TRow[] = [];
+  const dates: TPeachtreeResult["dates"] = [];
   const skipped: TPeachtreeResult["skipped"] = [];
   let invoices = 0;
   let total = 0;
@@ -194,6 +198,7 @@ export const buildPeachtreeSalesRows = (
     const invoiceNo = toId(sell.invoiceNo);
 
     lines.forEach((line, index) => {
+      dates.push({ sale: sell.saleDate, created: sell.createdAt });
       rows.push([
         customerId,
         invoiceNo,
@@ -215,7 +220,7 @@ export const buildPeachtreeSalesRows = (
     total += receivable;
   });
 
-  return { rows, invoices, skipped, total: round2(total) };
+  return { rows, dates, invoices, skipped, total: round2(total) };
 };
 
 // Settings the export cannot work without
