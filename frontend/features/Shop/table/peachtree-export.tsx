@@ -247,20 +247,9 @@ export default function ExportPeachtree({
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Export sales for Peachtree</DialogTitle>
-            <DialogDescription>
-              Sales Journal import file for Peachtree / Sage 50, one row per
-              item line. Period: <strong>{period}</strong>. The status, employee
-              and search filters of the page apply too; cancelled and
-              not-approved sales are left out. Set the date range with the
-              page&apos;s date filter.
-            </DialogDescription>
+           
           </DialogHeader>
 
-          <p className="rounded-md border border-dashed p-3 text-sm">
-            The G/L account columns (Accounts Receivable Account, G/L Account)
-            are left empty. Fill them in Excel before importing into
-            Peachtree.
-          </p>
 
           <div className="space-y-3 rounded-md border p-3">
             <label className="flex cursor-pointer items-center gap-2 text-sm">
@@ -281,22 +270,10 @@ export default function ExportPeachtree({
               />
             ) : (
               <p className="text-muted-foreground text-xs">
-                Customer ID = the customer&apos;s company name or name (first 20
-                characters). Each must exist as a customer in Peachtree. Sales
-                without a customer use &quot;{settings.customerId || "—"}
-                &quot;.
+               
               </p>
             )}
-            <label className="flex cursor-pointer items-center gap-2 text-sm">
-              <Checkbox
-                checked={settings.includeItemId}
-                onCheckedChange={(checked) =>
-                  update({ includeItemId: checked === true })
-                }
-              />
-              Fill Item ID with the product / subproduct code (the items must
-              exist in Peachtree inventory)
-            </label>
+          
             <div className="flex items-center gap-2 text-sm">
               <span>Date format</span>
               <Select
@@ -348,13 +325,7 @@ export default function ExportPeachtree({
             </div>
           )}
 
-          <p className="text-muted-foreground text-xs">
-            Download Excel, add the accounts, then save it as{" "}
-            <strong>.csv</strong> for Peachtree (File &gt; Select Import/Export
-            &gt; Accounts Receivable &gt; Sales Journal). The Excel file also
-            has the import steps. Try one day first.
-          </p>
-
+      
           <DialogFooter>
             <Button
               variant="outline"
