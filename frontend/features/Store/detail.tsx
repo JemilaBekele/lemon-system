@@ -365,7 +365,7 @@ const StoreSaleDetailPage: React.FC<SaleViewProps> = ({ id }) => {
   const printRef = useRef<HTMLDivElement>(null);
 
   const BACKEND_URL =
-    'http://localhost:5000';
+    process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5050';
 
   // Helper functions
   const normalizeImagePath = (path?: string | File) => {

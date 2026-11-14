@@ -51,7 +51,7 @@ interface CategoryFormProps {
   isEdit?: boolean;
 }
 
-const BACKEND_URL = 'http://localhost:5000';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5050';
 
 export const normalizeImagePath = (path?: string) => {
   if (!path) return undefined;

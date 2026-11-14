@@ -7,7 +7,7 @@ export const IMAGE_BASE_URL = (
   (process.env.EXPO_PUBLIC_IMAGE_URL || '').trim() || apiUrl.replace(/\/api\/?$/, '')
 ).replace(/\/+$/, '');
 
-// "uploads\product_images\a.webp" -> "http://host:5000/uploads/product_images/a.webp"
+// "uploads\product_images\a.webp" -> "http://host:5050/uploads/product_images/a.webp"
 export const getImageUrl = (path?: string | null): string | undefined => {
   if (!path) return undefined;
   const normalized = path.trim().replace(/\\/g, '/');

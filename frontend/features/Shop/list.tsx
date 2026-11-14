@@ -45,7 +45,7 @@ import SelectReac from 'react-select';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
 // You can use an environment variable or fallback to a default value
-const BACKEND_URL = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5050';
 
 // Helper functions
 const normalizeImagePath = (path?: string | File) => {
@@ -226,7 +226,7 @@ const SubProductModal = ({ product, isOpen, onClose, onSelectSubProduct }: SubPr
     
     const normalizedPath = normalizeImagePath(imagePath);
     
-    if (normalizedPath === '' || normalizedPath === 'http://localhost:5000/') {
+    if (normalizedPath === '' || normalizedPath === `${BACKEND_URL}/`) {
       if (useFallback && product?.imageUrl) {
         return normalizeImagePath(product.imageUrl);
       }

@@ -21,7 +21,12 @@ const corsAllowedOrigins = String(envVars.CORS_ALLOWED_ORIGINS || '')
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-const defaultLocalOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
+const defaultLocalOrigins = [
+  'http://localhost:3030',
+  'http://127.0.0.1:3030',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+];
 const resolvedCorsOrigins =
   corsAllowedOrigins.length > 0 ? corsAllowedOrigins : defaultLocalOrigins;
 
