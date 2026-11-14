@@ -1,0 +1,362 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+:root {
+  --background: oklch(1 0 0);          /* white */
+  --foreground: oklch(0.145 0 0);      /* black text */
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+
+  /* 🟠 PRIMARY ORANGE (matches e-commerce) */
+  --primary: oklch(0.68 0.19 45);
+  --primary-foreground: oklch(1 0 0);
+
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+
+  --destructive: oklch(0.58 0.22 27);
+
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.68 0.19 45);
+  --sidebar: oklch(0.54 0.15 42);               /* main orange */
+  --sidebar-foreground: oklch(0.99 0.005 55);  /* white text */
+
+  --sidebar-primary: oklch(0.97 0.035 75);     /* active item: soft cream */
+  --sidebar-primary-foreground: oklch(0.40 0.13 40);
+
+  --sidebar-accent: oklch(0.61 0.14 42);       /* hover */
+  --sidebar-accent-foreground: oklch(1 0 0);
+
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.85 0.10 65);
+  --radius: 0.625rem;
+}
+
+/* ===========================
+   DARK MODE (NO PURE BLACK)
+   MODERN NAVY ERP THEME
+=========================== */
+.dark {
+  --background: oklch(0.20 0.03 255);        /* deep navy base */
+  --foreground: oklch(0.98 0 0);             /* soft white */
+
+  --card: oklch(0.24 0.04 255);              /* elevated navy card */
+  --card-foreground: oklch(0.98 0 0);
+
+  --popover: oklch(0.24 0.04 255);
+  --popover-foreground: oklch(0.98 0 0);
+
+  /* 🟠 PRIMARY ORANGE (matches e-commerce) */
+  --primary: oklch(0.75 0.18 50);
+  --primary-foreground: oklch(0.17 0.025 35);
+
+  /* 🔵 SURFACES */
+  --secondary: oklch(0.28 0.03 255);
+  --secondary-foreground: oklch(0.98 0 0);
+
+  --muted: oklch(0.28 0.03 255);
+  --muted-foreground: oklch(0.75 0 0);
+
+  --accent: oklch(0.32 0.04 255);
+  --accent-foreground: oklch(0.98 0 0);
+
+  /* ALERT */
+  --destructive: oklch(0.65 0.20 25);
+  --sidebar: oklch(0.40 0.14 40);              /* deep orange */
+  --sidebar-foreground: oklch(0.98 0.005 55);  /* white */
+
+  --sidebar-primary: oklch(0.95 0.045 55);     /* active item: cream */
+  --sidebar-primary-foreground: oklch(0.40 0.14 40);
+
+  --sidebar-accent: oklch(0.48 0.16 42);       /* hover */
+  --sidebar-accent-foreground: oklch(1 0 0);
+
+  --sidebar-border: oklch(1 0 0 / 15%);
+  --sidebar-ring: oklch(0.95 0.045 55);
+  /* BORDERS / INPUTS */
+  --border: oklch(0.35 0.03 255 / 35%);
+  --input: oklch(0.35 0.03 255 / 45%);
+  --ring: oklch(0.75 0.18 50);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   Branded Splash Screen (shared by ProtectedRoute + Login)
+   ═══════════════════════════════════════════════════ */
+
+:root {
+  --bsplash-bg: #f5f6fa;
+  --bsplash-glow: rgba(180, 145, 30, 0.10);
+  --bsplash-glow-mid: rgba(180, 145, 30, 0.04);
+  --bsplash-orbit-a: rgba(180, 145, 30, 0.22);
+  --bsplash-orbit-b: rgba(180, 145, 30, 0.08);
+  --bsplash-orbit-c: rgba(180, 145, 30, 0.12);
+  --bsplash-orbit-d: rgba(180, 145, 30, 0.04);
+  --bsplash-orbit-e: rgba(180, 145, 30, 0.06);
+  --bsplash-logo: #B8962E;
+  --bsplash-logo-shadow: rgba(180, 145, 30, 0.25);
+  --bsplash-brand: #1a1a2e;
+  --bsplash-message: rgba(0, 0, 0, 0.45);
+  --bsplash-dot: rgba(180, 145, 30, 0.55);
+  --bsplash-bar-bg: rgba(0, 0, 0, 0.05);
+  --bsplash-bar: #C4A030;
+  --bsplash-success: #16a34a;
+  --bsplash-success-shadow: rgba(22, 163, 74, 0.2);
+  --bsplash-success-dot: rgba(22, 163, 74, 0.5);
+  --bsplash-success-glow: rgba(22, 163, 74, 0.08);
+  --bsplash-success-glow-mid: rgba(22, 163, 74, 0.03);
+  --bsplash-success-orbit-a: rgba(22, 163, 74, 0.18);
+  --bsplash-success-orbit-b: rgba(22, 163, 74, 0.06);
+  --bsplash-success-orbit-c: rgba(22, 163, 74, 0.10);
+  --bsplash-success-orbit-d: rgba(22, 163, 74, 0.04);
+  --bsplash-success-orbit-e: rgba(22, 163, 74, 0.05);
+  --bsplash-success-bar: #16a34a;
+}
+
+.dark {
+  --bsplash-bg: #0a0a0f;
+  --bsplash-glow: rgba(212, 175, 55, 0.08);
+  --bsplash-glow-mid: rgba(212, 175, 55, 0.03);
+  --bsplash-orbit-a: rgba(212, 175, 55, 0.25);
+  --bsplash-orbit-b: rgba(212, 175, 55, 0.08);
+  --bsplash-orbit-c: rgba(212, 175, 55, 0.15);
+  --bsplash-orbit-d: rgba(212, 175, 55, 0.05);
+  --bsplash-orbit-e: rgba(212, 175, 55, 0.08);
+  --bsplash-logo: #D4AF37;
+  --bsplash-logo-shadow: rgba(212, 175, 55, 0.3);
+  --bsplash-brand: #ffffff;
+  --bsplash-message: rgba(255, 255, 255, 0.4);
+  --bsplash-dot: rgba(212, 175, 55, 0.5);
+  --bsplash-bar-bg: rgba(255, 255, 255, 0.04);
+  --bsplash-bar: #D4AF37;
+  --bsplash-success: #4ade80;
+  --bsplash-success-shadow: rgba(74, 222, 128, 0.3);
+  --bsplash-success-dot: rgba(74, 222, 128, 0.5);
+  --bsplash-success-glow: rgba(74, 222, 128, 0.06);
+  --bsplash-success-glow-mid: rgba(74, 222, 128, 0.02);
+  --bsplash-success-orbit-a: rgba(74, 222, 128, 0.2);
+  --bsplash-success-orbit-b: rgba(74, 222, 128, 0.06);
+  --bsplash-success-orbit-c: rgba(74, 222, 128, 0.12);
+  --bsplash-success-orbit-d: rgba(74, 222, 128, 0.04);
+  --bsplash-success-orbit-e: rgba(74, 222, 128, 0.06);
+  --bsplash-success-bar: #4ade80;
+}
+
+.branded-splash {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: var(--bsplash-bg);
+  z-index: 9999;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+  animation: bsFadeIn 0.4s ease-out;
+}
+@keyframes bsFadeIn { from { opacity: 0 } to { opacity: 1 } }
+
+.branded-splash__glow {
+  position: absolute; top: 40%; left: 50%;
+  width: 550px; height: 550px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, var(--bsplash-glow) 0%, var(--bsplash-glow-mid) 30%, transparent 60%);
+  pointer-events: none;
+  animation: bsGlow 3s ease-in-out infinite;
+}
+@keyframes bsGlow {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50%      { opacity: 1;   transform: translate(-50%, -50%) scale(1.12); }
+}
+
+.branded-splash__orbits {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -55%);
+  pointer-events: none;
+}
+.branded-splash__orbit {
+  position: absolute; border-radius: 50%;
+  border: 1px solid transparent;
+  top: 50%; left: 50%;
+  animation: bsOrbit linear infinite;
+}
+.branded-splash__orbit--1 {
+  width: 160px; height: 160px; margin: -80px 0 0 -80px;
+  border-top-color: var(--bsplash-orbit-a);
+  border-right-color: var(--bsplash-orbit-b);
+  animation-duration: 3s;
+}
+.branded-splash__orbit--2 {
+  width: 220px; height: 220px; margin: -110px 0 0 -110px;
+  border-bottom-color: var(--bsplash-orbit-c);
+  border-left-color: var(--bsplash-orbit-d);
+  animation-duration: 5s; animation-direction: reverse;
+}
+.branded-splash__orbit--3 {
+  width: 280px; height: 280px; margin: -140px 0 0 -140px;
+  border-top-color: var(--bsplash-orbit-e);
+  animation-duration: 8s;
+}
+@keyframes bsOrbit { to { transform: rotate(360deg); } }
+
+.branded-splash__logo {
+  position: relative; z-index: 2;
+  width: 64px; height: 64px;
+  color: var(--bsplash-logo);
+  animation: bsLogoPulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 18px var(--bsplash-logo-shadow));
+}
+.branded-splash__logo svg { width: 100%; height: 100%; }
+.branded-splash__logo--success {
+  animation: bsLogoSuccess 0.6s cubic-bezier(0.22,1,0.36,1) forwards;
+  color: var(--bsplash-success);
+  filter: drop-shadow(0 0 18px var(--bsplash-success-shadow));
+}
+.branded-splash__check {
+  stroke-dasharray: 32; stroke-dashoffset: 32;
+  animation: bsCheckDraw 0.5s ease-out 0.3s forwards;
+}
+@keyframes bsLogoPulse {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50%      { transform: scale(1.06); opacity: 1; }
+}
+@keyframes bsLogoSuccess {
+  0%   { transform: scale(0.8); opacity: 0; }
+  60%  { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes bsCheckDraw { to { stroke-dashoffset: 0; } }
+
+.branded-splash__content {
+  position: relative; z-index: 2;
+  text-align: center; margin-top: 26px;
+  animation: bsContentIn 0.5s ease-out 0.15s both;
+}
+@keyframes bsContentIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.branded-splash__brand {
+  font-size: 20px; font-weight: 600;
+  color: var(--bsplash-brand);
+  margin: 0 0 6px; letter-spacing: 0.4px;
+}
+.branded-splash__message {
+  font-size: 13px; color: var(--bsplash-message);
+  margin: 0 0 14px; letter-spacing: 0.2px;
+}
+
+.branded-splash__dots {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.branded-splash__dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--bsplash-dot);
+  animation: bsDot 1.4s ease-in-out infinite;
+}
+.branded-splash__dot:nth-child(2) { animation-delay: 0.16s; }
+.branded-splash__dot:nth-child(3) { animation-delay: 0.32s; }
+.branded-splash--success .branded-splash__dot {
+  background: var(--bsplash-success-dot);
+}
+@keyframes bsDot {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40%           { transform: scale(1.2); opacity: 1; }
+}
+
+.branded-splash__progress {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px; background: var(--bsplash-bar-bg); overflow: hidden;
+}
+.branded-splash__bar {
+  height: 100%; width: 35%;
+  background: linear-gradient(90deg, transparent, var(--bsplash-bar), transparent);
+  animation: bsBar 2s ease-in-out infinite;
+  border-radius: 2px;
+}
+.branded-splash__bar--fast {
+  background: linear-gradient(90deg, transparent, var(--bsplash-success-bar), transparent);
+  animation-duration: 1s;
+}
+@keyframes bsBar {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
+.branded-splash--success .branded-splash__glow {
+  background: radial-gradient(circle, var(--bsplash-success-glow) 0%, var(--bsplash-success-glow-mid) 30%, transparent 60%);
+}
+.branded-splash--success .branded-splash__orbit--1 {
+  border-top-color: var(--bsplash-success-orbit-a);
+  border-right-color: var(--bsplash-success-orbit-b);
+}
+.branded-splash--success .branded-splash__orbit--2 {
+  border-bottom-color: var(--bsplash-success-orbit-c);
+  border-left-color: var(--bsplash-success-orbit-d);
+}
+.branded-splash--success .branded-splash__orbit--3 {
+  border-top-color: var(--bsplash-success-orbit-e);
+}

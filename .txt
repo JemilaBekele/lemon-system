@@ -1,0 +1,67 @@
+Yes, this can be done: keep two separate systems with two databases, and connect them with a small, controlled link.
+
+**The three rules**
+
+1. **The stock system is the only place products are created.** It's where purchases, batches and stock live, so it should own the product list.
+2. **The e-commerce system receives products from stock and adds only online-shop details:** brand, photos, features, directions, discounts, featured/hot-selling. Its staff never type a product name.
+3. **An e-commerce order becomes a sale in stock when it's confirmed.** The company keeps creating its own sales directly in stock exactly as today. Both kinds appear in the same sales list, labelled by source.
+
+Your two schemas already make this easy. Both have `Product` and `SubProduct` with a unique `productCode` / `subProductCode`, the same Category → SubCategory → UnitOfMeasure layout, and the same `Customer` idea. The e-commerce schema even has an unused `SyncLog` table you can use.
+
+## 1. One product list (stock to e-commerce)
+
+**Who owns which field**
+
+| Owned by stock (read-only in e-commerce) | Owned by e-commerce only |
+|---|---|
+| productCode, name, generic, category, subcategory, unit, sub-products, isActive, base price | brand, images, features, specs, packaging, directions, warranty, discounts, featured / hot-selling / new arrival, "show online" switch |
+
+**Schema changes**
+- **E-commerce `Product` and `SubProduct`:** add `stockProductId` / `stockSubProductId` (unique) and `isPublished` (default false). Do the same for Category, SubCategory and UnitOfMeasure, so they come from stock too.
+- **Stock:** add an outbox table, e.g. `IntegrationOutbox { id, type, payload, status, attempts, lastError }`.
+
+**How it flows**
+1. Staff create or edit a product in stock. In the same transaction, stock writes a row to the outbox.
+2. A job in stock (you already have `node-cron`) sends pending rows to an internal e-commerce endpoint, e.g. `POST /api/v1/integration/products/upsert`. That endpoint creates or updates the product by `stockProductId`.
+3. If e-commerce is down, the row stays pending and is retried. Saving a product in stock never fails because of the online shop.
+4. In the e-commerce dashboard, "Create product" becomes **"Products from stock"**. Staff choose which products to show online and add photos, brand and descriptions.
+5. A **"Sync all"** button runs a full resync and records it in `SyncLog`. Use it once at the start to match existing e-commerce products by `productCode`, and afterwards whenever something gets out of step.
+
+## 2. E-commerce orders become stock sales
+
+**Schema changes in stock**
+- **`Sell`:** add `source` (enum `STOCK` | `ECOMMERCE`, default `STOCK`), `externalOrderId` (unique) and `externalOrderNumber`.
+- **`Customer`:** add `externalCustomerId` (unique).
+- **Which shop fills online orders:** a `SellItem` needs a `shopId`. Add `stockShopId` to e-commerce `WarehouseLocation`, or set one "Online Shop" in stock settings.
+
+**How it flows**
+1. Staff confirm an order in e-commerce (status `CONFIRMED`). E-commerce writes an outbox row and sends it to stock: `POST /api/integration/ecommerce-orders`. The payload includes the order number, customer (name, phone, TIN, company), and items (`stockProductId`, `stockSubProductId`, quantity, unit price after discount), plus delivery fee and totals.
+2. Stock:
+   - creates or updates the customer by `externalCustomerId` (falling back to phone)
+   - creates a `Sell` with `source = ECOMMERCE` and `saleStatus = NOT_APPROVED`, priced as the customer paid
+3. Store staff handle it like any other sale: choose batches, approve, deliver. **Stock only goes down at your existing approval step**, so batch, FIFO and ledger logic stay in one place.
+4. Because `externalOrderId` is unique, a repeated message can never create a second sale.
+5. If e-commerce cancels the order before delivery, it sends a cancel message and stock cancels that `Sell`.
+
+**The company's own orders:** nothing changes. Staff keep creating sales in stock, with `source = STOCK`. Add a "Source" filter and badge to the sales list so online and in-house sales can be told apart.
+
+## 3. Sending information back (phase 2, optional)
+- **Order status:** when stock marks a sale **Delivered** or **Cancelled**, it tells e-commerce to update the order, and the customer gets the existing notification.
+- **Availability:** stock sends "in stock / out of stock" per product, so the shop can hide products or show "out of stock". This works well with the new product-level warning quantity.
+
+## Security
+- **Not public:** the integration endpoints are separate from the user-facing routes and don't use user logins.
+- **Shared key:** each side checks a shared secret header, e.g. `X-Integration-Key`, set in both `.env` files. An HMAC signature is better still.
+
+## Decisions the owner needs to make
+1. **Price:** does the stock `sellPrice` become the online base price, or does e-commerce set its own? (Tier discounts stay in e-commerce either way.)
+2. **Fulfilment:** which shop or store fills online orders? One online shop, or one per warehouse?
+3. **Timing:** should the stock sale be created when the order is **confirmed** (my suggestion) or when it's placed?
+4. **Delivery fee:** should it go on the stock sale as a line or note?
+
+## Order to build it
+1. Product link: schema fields, stock outbox, e-commerce upsert endpoint, "Sync all", and the e-commerce "Products from stock" screen.
+2. Orders into stock: `source` and `externalOrderId`, the stock endpoint, and the confirm hook in e-commerce.
+3. Status and availability going back.
+
+I can start on step 1 once the owner answers the price and fulfilment questions. I can also turn this into a page you can share with the owner.

@@ -1,0 +1,137 @@
+import api from "@/(utils)/config";
+import { DeliveryData, GetAllSellsUserParams, GetAllSellsUserResponse, ProductBatch, SellStockCorrection } from "@/(utils)/types";
+
+
+export const getAllSellsUser = async (
+  params: GetAllSellsUserParams
+): Promise<GetAllSellsUserResponse> => {
+  try {
+    const response = await api.get("/sells/store/getAll", {
+      params: {
+        startDate: params.startDate,
+        endDate: params.endDate,
+        customerName: params.customerName,
+        salesPersonName: params.salesPersonName,
+        status: params.status,
+      }
+    });    
+    return {
+      success: true,
+      sells: response.data.sells || [],
+      count: response.data.count || 0,
+    };
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to fetch user sells");
+  }
+};
+
+
+
+
+
+export const getSellByIdByUser = async (
+  params: GetAllSellsUserParams
+): Promise<GetAllSellsUserResponse> => {
+  try {
+    const response = await api.get(`/sells/${params.id}/user/based`); 
+    
+    // Check if sell exists
+    const sellData = response.data.sell;
+
+    
+    return {
+      success: true,
+      sells: sellData ? [sellData] : [],  // ✅ Wrap single sell in array
+      count: response.data.count || (sellData ? 1 : 0),
+    };
+  } catch (error: any) {
+    console.error('❌ API Error:', error);
+    throw new Error(error.response?.data?.message || "Failed to fetch user sells");
+  }
+};
+
+// Get available batches by product and shop
+// For a sub-product line pass subProductId: only its batches can fill it.
+export const getAvailableBatchesByProductAndShop = async (
+  shopId: string,
+  productId: string,
+  subProductId?: string | null
+): Promise<{ success: boolean; batches: ProductBatch[]; count: number }> => {
+  try {
+    const response = await api.get(
+      `/shops/${shopId}/products/${productId}/batches`,
+      { params: subProductId ? { subProductId } : undefined }
+    );
+    const batches: ProductBatch[] = (response.data.batches || []).map((batch: ProductBatch) => ({
+      ...batch,
+      // older servers do not send availableQuantity
+      availableQuantity:
+        batch.availableQuantity ??
+        (batch.ShopStock || []).reduce((sum, row) => sum + (row.quantity || 0), 0),
+    }));
+    return {
+      success: true,
+      batches,
+      count: response.data.count || 0,
+    };
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to fetch available batches");
+  }
+};
+
+// Partial sale delivery
+export const partialSaleDelivery = async (
+  id: string,
+  deliveryData: DeliveryData
+): Promise<{ success: boolean; sell: any; message: string }> => {
+  try {
+    const response = await api.patch(`/sells/partial/deliver/${id}`, {
+      deliveryData
+    });
+    return {
+      success: true,
+      sell: response.data.sell,
+      message: response.data.message || "Partial delivery completed successfully",
+    };
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to process partial delivery");
+  }
+};
+// Corrections (returns / extra deliveries) raised against a sale. The server
+// keeps only the lines for shops this user can see.
+export const getSaleCorrections = async (
+  sellId: string
+): Promise<SellStockCorrection[]> => {
+  try {
+    const response = await api.get(`/sells/${sellId}/stock/corrections/filter/stock`);
+    return response.data.sellStockCorrections || [];
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to fetch sale corrections");
+  }
+};
+
+// Approve the lines that were actually handed over / taken back. Lines left
+// out stay pending and the correction becomes PARTIAL.
+export const approveSaleCorrection = async (
+  id: string,
+  deliveredItemIds: string[]
+): Promise<{ message: string }> => {
+  try {
+    const response = await api.patch(`/sell-stock-corrections/${id}/approve`, {
+      deliveredItemIds,
+    });
+    return { message: response.data.message || "Correction approved" };
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to approve correction");
+  }
+};
+
+// Reject a correction (only while nothing of it has been approved yet)
+export const rejectSaleCorrection = async (id: string): Promise<{ message: string }> => {
+  try {
+    const response = await api.patch(`/sell-stock-corrections/${id}/reject`);
+    return { message: response.data.message || "Correction rejected" };
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to reject correction");
+  }
+};
